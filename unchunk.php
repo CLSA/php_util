@@ -18,8 +18,18 @@ util::out('reading csv data' );
 for($i = 0; $i < $num_chunk; $i++)
 {
   $infileName = sprintf($infilePattern, $i);
+  if(!file_exists($infileName))
+  {
+    util::out('file ' . $infileName . ' does not exist');
+    die();
+  }
   util::out('reading ' . $infileName);
   $file = fopen($infileName,'r');
+  if(false === $file)
+  {
+    util::out('file ' . $infileName . ' cannot be opened');
+    die();
+  }
   $line_count = 0;
   while(false !== ($line = fgets($file)))
   {
