@@ -48,6 +48,23 @@ class util
   }
 
   // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  public static function rsearch($folder, $pattern)
+  {
+    $dir = new RecursiveDirectoryIterator($folder);
+    $ite = new RecursiveIteratorIterator($dir);
+    $reg = new RegexIterator($ite, $pattern, RegexIterator::GET_MATCH);
+    $reg->next();
+    $fileList = array();
+    while($reg->valid()) {
+      $item = current($reg->current());
+      if(file_exists($item))
+        $fileList[] = $item;
+      $reg->next();
+    }
+    return $fileList;
+  }
+
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   public static function permutations( array $array )
   {
     if( 1 == count( $array ) )
