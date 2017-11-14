@@ -65,6 +65,46 @@ class util
   }
 
   // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  public static function read_csv($fileName)
+  {
+    $data = array();
+    $file = fopen($fileName,'r');
+    if(false === $file)
+    {
+      util::out('file ' . $fileName . ' cannot be opened');
+      die();
+    }
+    $line = NULL;
+    $line_count = 0;
+    $nlerr = 0;
+    $first = true;
+    $header = NULL;
+    while(false !== ($line = fgets($file)))
+    {
+      $line_count++;
+      $line = trim($line," \t\n\r\0\x0B\x08\"");
+      if($first)
+      {
+        $header = explode('","',$line);
+        $first = false;
+        //var_dump($header);
+        continue;
+      }
+      $line1 = explode('","',$line);
+
+      if(count($header)!=count($line1))
+      {
+        util::out(count($header) . ' < > ' . count($line1));
+        util::out('Error: line (' . $line_count . ') wrong number of elements ' . $line);
+        die();
+      }
+      $data[] = array_combine($header,$line1);
+    }
+    fclose($file);
+    return $data;
+  }
+
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   public static function permutations( array $array )
   {
     if( 1 == count( $array ) )
