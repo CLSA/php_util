@@ -28,9 +28,9 @@ class database
   {
     $result = $this->connection->query( $sql );
     if( false === $result )
-    {   
+    {
       util::out( $this->connection->error );
-      util::out( $sql );      
+      util::out( $sql );
       return false;
     }
     return true;
@@ -41,9 +41,9 @@ class database
   {
     $result = $this->connection->query( $sql );
     if( false === $result )
-    {   
+    {
       util::out( $this->connection->error );
-      util::out( $sql );      
+      util::out( $sql );
       return false;
     }
     $rows = array();
@@ -57,9 +57,9 @@ class database
   {
     $result = $this->connection->query( $sql );
     if( false === $result )
-    {   
+    {
       util::out( $this->connection->error );
-      util::out( $sql );      
+      util::out( $sql );
       return false;
     }
     $row = $result->fetch_assoc();
@@ -72,16 +72,15 @@ class database
   {
     $result = $this->connection->query( $sql );
     if( false === $result )
-    {   
+    {
       util::out( $this->connection->error );
-      util::out( $sql );      
+      util::out( $sql );
       return false;
     }
     $array = $result->fetch_array( MYSQLI_NUM );
     $result->free();
     $value = is_null( $array ) ? NULL : current( $array );
     return $value;
-    
   }
 
   // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
@@ -91,7 +90,7 @@ class database
     return $id;
   }
 
-  protected $connection; 
+  protected $connection;
   private $server;
   private $username;
   private $password;

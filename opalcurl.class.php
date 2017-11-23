@@ -85,7 +85,7 @@ class opalcurl
   {
     if( '' == $this->opal_port || null == $this->opal_port )
       $url = sprintf( 'https://%s/ws%s', $this->opal_url, $url );
-    else  
+    else
       $url = sprintf( 'https://%s:%d/ws%s', $this->opal_url, $this->opal_port, $url );
 
     $headers['Accept'] = 'application/json';
@@ -210,7 +210,7 @@ class opalcurl
     }
     return $list;
   }
-  
+
   // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+I-
   /**
    * Returns a list of datasources (projects) in the opal instance
@@ -229,7 +229,9 @@ class opalcurl
           $list[$obj->name]['table'] = $obj->table;
         if( property_exists( $obj, 'view' ) )
           $list[$obj->name]['view'] = $obj->view;
-      } 
+        if( !array_key_exists( $obj->name, $list) )
+          $list[$obj->name] = null;
+      }
     }
     return $list;
   }
@@ -252,7 +254,7 @@ class opalcurl
           $list[$obj->name]['entityType'] = $obj->entityType;
         if( property_exists( $obj, 'datasourceName' ) )
           $list[$obj->name]['datasourceName'] = $obj->datasourceName;
-      }  
+      }
     }
     return $list;
   }
@@ -317,13 +319,13 @@ class opalcurl
    */
   public function get_complete_list( $limit = '500' )
   {
-    $identifier_list = get_identifiers();
+    $identifier_list = $this->get_identifiers();
     $list = array();
     $max_limit = count($identifier_list);
     $offset = 0;
     while( $offset < $max_limit )
     {
-      $result = get_list( $offset, $limit);
+      $result = $this->get_list( $offset, $limit);
       $num = count( $result );
       if( 0 < $num )
       {
