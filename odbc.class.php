@@ -1,10 +1,20 @@
 <?php
 
-require_once('util.class.php');
+/**
+ * The database class represents a odbc connection and information.
+ */
 
 class odbc
 {
-  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  /**
+   * Constructor
+   *
+   * The constructor either creates a new connection to a database.
+   * @param string $server The name of the database's server
+   * @param string $username The username to connect with.
+   * @param string $password The password to connect with.
+   * @access public
+   */
   public function __construct( $server, $username, $password )
   {
     $this->server = $server;
@@ -14,38 +24,55 @@ class odbc
 
     if( false === $this->connection )
     {
-      util::error( 'Unable to connect to database, quiting [' . odbc_errormsg() . ']' );
-      die();
+      fwrite( STDERR, sprintf( 'Unable to connect to odbc database (%s, %s)',
+        odbc_errormsg(), odbc_error() ) );
     }
   }
 
-  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  /**
+   * Destructor
+   *
+   */
   public function __destruct()
   {
     odbc_close( $this->connection );
   }
 
-  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  /**
+   * Database convenience method.
+   *
+   * Execute SQL statement $sql and return true or false on success or fail.
+   * @param string $sql SQL statement
+   * @return true/false on success/fail
+   * @access public
+   */
   public function execute( $sql )
   {
     $result = odbc_exec( $this->connection, $sql );
     if( false === $result )
     {
-      util::out( odbc_errormsg() );
-      util::out( $sql );
+      fwrite( STDERR, sprintf( 'odbc database error (%s, %s): %s',
+        odbc_errormsg(), odbc_error(), $sql ) );
       return false;
     }
     return true;
   }
 
-  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  /**
+   * Database convenience method.
+   *
+   * Executes the SQL and returns the all the rows as a 2-dimensional array.
+   * @param string $sql SQL statement
+   * @return array (empty if no records are found)
+   * @access public
+   */
   public function get_all( $sql )
   {
     $result = odbc_exec( $this->connection, $sql );
     if( false === $result )
     {
-      util::out( odbc_errormsg() );
-      util::out( $sql );
+      fwrite( STDERR, sprintf( 'odbc database error (%s, %s): %s',
+        odbc_errormsg(), odbc_error(), $sql ) );
       return false;
     }
     $rows = array();
@@ -64,14 +91,21 @@ class odbc
     return $rows;
   }
 
-  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  /**
+   * Database convenience method.
+   *
+   * Executes the SQL and returns the first row as an array.
+   * @param string $sql SQL statement
+   * @return array (empty if no records are found)
+   * @access public
+   */
   public function get_row( $sql )
   {
     $result = odbc_exec( $this->connection, $sql );
     if( false === $result )
     {
-      util::out( odbc_errormsg() );
-      util::out( $sql );
+      fwrite( STDERR, sprintf( 'odbc database error (%s, %s): %s',
+        odbc_errormsg(), odbc_error(), $sql ) );
       return false;
     }
     $row = NULL;
@@ -87,14 +121,21 @@ class odbc
     return $row;
   }
 
-  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  /**
+   * Database convenience method.
+   *
+   * Executes the SQL and returns the first field of the first row.
+   * @param string $sql SQL statement
+   * @return native or NULL if no records were found.
+   * @access public
+   */
   public function get_one( $sql )
   {
     $result = odbc_exec( $this->connection, $sql );
     if( false === $result )
     {
-      util::out( odbc_errormsg() );
-      util::out( $sql );
+      fwrite( STDERR, sprintf( 'odbc database error (%s, %s): %s',
+        odbc_errormsg(), odbc_error(), $sql ) );
       return false;
     }
     $array = odbc_fetch_array( $result, 0 );
@@ -103,8 +144,31 @@ class odbc
     return $value;
   }
 
+  /**
+   * A reference to the odbc resource.
+   * @var resource
+   * @access protected
+   */
   protected $connection;
+
+  /**
+   * The server that the database is located
+   * @var string
+   * @access private
+   */
   private $server;
+
+  /**
+   * Which username to use when connecting to the database
+   * @var string
+   * @access private
+   */
   private $username;
+
+  /**
+   * Which password to use when connecting to the database
+   * @var string
+   * @access private
+   */
   private $password;
 }
