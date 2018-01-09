@@ -26,7 +26,7 @@ class database
     if( $this->connection->connect_error )
     {
       fwrite( STDERR, sprintf( 'Unable to connect to database (%s, %s)',
-        $this->connection->connect_error, $this->connection->connect_errno );
+        $this->connection->connect_error, $this->connection->connect_errno ) );
     }
     $this->connection->set_charset( 'utf8' );
   }
@@ -45,7 +45,7 @@ class database
     if( false === $result )
     {
       fwrite( STDERR, sprintf( 'database error (%s, %s): %s',
-        $this->connection->error, $this->connection->errno, $sql );
+        $this->connection->error, $this->connection->errno, $sql ) );
       return false;
     }
     return true;
@@ -65,7 +65,7 @@ class database
     if( false === $result )
     {
       fwrite( STDERR, sprintf( 'database error (%s, %s): %s',
-        $this->connection->error, $this->connection->errno, $sql );
+        $this->connection->error, $this->connection->errno, $sql ) );
       return false;
     }
     $rows = array();
@@ -88,7 +88,7 @@ class database
     if( false === $result )
     {
       fwrite( STDERR, sprintf( 'database error (%s, %s): %s',
-        $this->connection->error, $this->connection->errno, $sql );
+        $this->connection->error, $this->connection->errno, $sql ) );
       return false;
     }
     $row = $result->fetch_assoc();
@@ -110,7 +110,7 @@ class database
     if( false === $result )
     {
       fwrite( STDERR, sprintf( 'database error (%s, %s): %s',
-        $this->connection->error, $this->connection->errno, $sql );
+        $this->connection->error, $this->connection->errno, $sql ) );
       return false;
     }
     $array = $result->fetch_array( MYSQLI_NUM );
