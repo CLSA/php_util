@@ -14,6 +14,7 @@ class database
    * @param string $username The username to connect with.
    * @param string $password The password to connect with.
    * @param string $database The name of the database.
+   * @throws Exception
    * @access public
    */
   public function __construct( $server, $username, $password, $database )
@@ -25,7 +26,8 @@ class database
     $this->connection = new \mysqli( $this->server, $this->username, $this->password, $this->name );
     if( $this->connection->connect_error )
     {
-      fwrite( STDERR, sprintf( 'Unable to connect to database (%s, %s)',
+      throw new Exception(
+        sprintf( 'Unable to connect to database (%s, %s)',
         $this->connection->connect_error, $this->connection->connect_errno ) );
     }
     $this->connection->set_charset( 'utf8' );
@@ -44,8 +46,6 @@ class database
     $result = $this->connection->query( $sql );
     if( false === $result )
     {
-      fwrite( STDERR, sprintf( 'database error (%s, %s): %s',
-        $this->connection->error, $this->connection->errno, $sql ) );
       return false;
     }
     return true;
@@ -64,8 +64,6 @@ class database
     $result = $this->connection->query( $sql );
     if( false === $result )
     {
-      fwrite( STDERR, sprintf( 'database error (%s, %s): %s',
-        $this->connection->error, $this->connection->errno, $sql ) );
       return false;
     }
     $rows = array();
@@ -87,8 +85,6 @@ class database
     $result = $this->connection->query( $sql );
     if( false === $result )
     {
-      fwrite( STDERR, sprintf( 'database error (%s, %s): %s',
-        $this->connection->error, $this->connection->errno, $sql ) );
       return false;
     }
     $row = $result->fetch_assoc();
@@ -109,8 +105,6 @@ class database
     $result = $this->connection->query( $sql );
     if( false === $result )
     {
-      fwrite( STDERR, sprintf( 'database error (%s, %s): %s',
-        $this->connection->error, $this->connection->errno, $sql ) );
       return false;
     }
     $array = $result->fetch_array( MYSQLI_NUM );
@@ -154,6 +148,15 @@ class database
 
     return 0 == strlen( $string ) ?
       'NULL' : sprintf( '"%s"', $this->connection->real_escape_string( $string ) );
+  }
+
+  public function get_last_error()
+  {
+    if( isset( $this->connection ) )
+      return sprintf( 'mysqli database error (%s, %s)',
+        $this->connection->error, $this->connection->errno );
+    else
+      return '';
   }
 
   /**

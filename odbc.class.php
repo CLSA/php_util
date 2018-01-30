@@ -13,6 +13,7 @@ class odbc
    * @param string $server The name of the database's server
    * @param string $username The username to connect with.
    * @param string $password The password to connect with.
+   * @throws Exception
    * @access public
    */
   public function __construct( $server, $username, $password )
@@ -24,7 +25,8 @@ class odbc
 
     if( false === $this->connection )
     {
-      fwrite( STDERR, sprintf( 'Unable to connect to odbc database (%s, %s)',
+      throw new Exception(
+        sprintf( 'Unable to connect to odbc database (%s, %s)',
         odbc_errormsg(), odbc_error() ) );
     }
   }
@@ -51,8 +53,6 @@ class odbc
     $result = odbc_exec( $this->connection, $sql );
     if( false === $result )
     {
-      fwrite( STDERR, sprintf( 'odbc database error (%s, %s): %s',
-        odbc_errormsg(), odbc_error(), $sql ) );
       return false;
     }
     return true;
@@ -71,8 +71,6 @@ class odbc
     $result = odbc_exec( $this->connection, $sql );
     if( false === $result )
     {
-      fwrite( STDERR, sprintf( 'odbc database error (%s, %s): %s',
-        odbc_errormsg(), odbc_error(), $sql ) );
       return false;
     }
     $rows = array();
@@ -104,14 +102,12 @@ class odbc
     $result = odbc_exec( $this->connection, $sql );
     if( false === $result )
     {
-      fwrite( STDERR, sprintf( 'odbc database error (%s, %s): %s',
-        odbc_errormsg(), odbc_error(), $sql ) );
       return false;
     }
     $row = NULL;
     if( odbc_fetch_row( $result ) )
     {
-      for($j = 1; $j <= odbc_num_fields( $result ); $j++ )
+      for( $j = 1; $j <= odbc_num_fields( $result ); $j++ )
       {
         $field = odbc_field_name( $result, $j );
         $row[$field] = odbc_result( $result, $field );
@@ -134,14 +130,17 @@ class odbc
     $result = odbc_exec( $this->connection, $sql );
     if( false === $result )
     {
-      fwrite( STDERR, sprintf( 'odbc database error (%s, %s): %s',
-        odbc_errormsg(), odbc_error(), $sql ) );
       return false;
     }
     $array = odbc_fetch_array( $result, 0 );
     $value = is_null( $array ) ? NULL : current( $array );
     odbc_free_result( $result );
     return $value;
+  }
+
+  public function get_last_error()
+  {
+    return sprintf( 'odbc database error (%s, %s)', odbc_errormsg(), odbc_error() );
   }
 
   /**
