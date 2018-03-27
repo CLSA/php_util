@@ -302,6 +302,18 @@ class opalcurl
 
   // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+I-
   /**
+   * Returns an array of objects containing a views variables
+   * @return array object
+   */
+  public function get_view_variables()
+  {
+    $url = str_replace( ' ', '%20',
+       sprintf( '/datasource/%s/view/%s/variables', $this->datasource, $this->view ) );
+    return $this->send( $url );
+  }
+
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+I-
+  /**
    * Returns a view definition in json decoded format
    * @return object json decoded view definition
    */
