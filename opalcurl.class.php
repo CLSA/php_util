@@ -181,6 +181,26 @@ class opalcurl
   }
 
   /**
+   * Sets the date range to restrict downloading to in the opal view by altering its
+   * magmascript entity filter.  The filter takes the form:
+   * $lastupdate().before(newValue('YYYY-MM-DD','date')).and(
+   * $lastupdate().after(newValue('YYYY-MM-DD','date')))
+   * The view definition .json file and the path to the file must be specified.
+   * See set_json_view_path, get_json_view_path
+   * @param string $date_before The date before in YYYY-MM-DD format
+   * @param string $date_after The date after in YYYY-MM-DD format
+   */
+  public function set_date_range( $date_before, $date_after )
+  {
+    $data = sprintf( "`sed -e 's/BEFORE_DATE/%s/;s/AFTER_DATE/%s/' %s/" . $this->view . ".json`",
+      $date_before, $date_after, $this->json_view_path );
+    $arguments = array(
+      'request' => 'PUT',
+      'data' => $data );
+    $this->send_to_view( '', $arguments );
+  }
+
+  /**
    * Returns a list of participant identifiers in a view
    * @return array of identifiers
    */
