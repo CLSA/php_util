@@ -245,4 +245,17 @@ class util
            ( 0 <= ($temp = strlen($haystack) - strlen($needle)) &&
              false !== strpos($haystack, $needle, $temp) );
   }
+
+  public static function time_to_label($time)
+  {
+    if($time<1.0)
+    {
+      return (intval($time*60) . ' sec');
+    }
+    else
+    {
+      return (floor($time) .  ':' . intval(($time-floor($time))*60) . ' min');
+    }
+  }
+
 }
