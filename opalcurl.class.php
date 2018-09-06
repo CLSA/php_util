@@ -189,15 +189,28 @@ class opalcurl
    * See set_json_view_path, get_json_view_path
    * @param string $date_before The date before in YYYY-MM-DD format
    * @param string $date_after The date after in YYYY-MM-DD format
+   * @param boolean $from_file For resolving curl argument list too long due to large json content
    */
-  public function set_date_range( $date_before, $date_after )
+  public function set_date_range( $date_before, $date_after, $from_file = false )
   {
     $data = sprintf( "`sed -e 's/BEFORE_DATE/%s/;s/AFTER_DATE/%s/' %s/" . $this->view . ".json`",
       $date_before, $date_after, $this->json_view_path );
+    $file = null;
+    if($from_file)
+    {
+      $file ='/tmp/' . $this->view . '.json';
+      $cmd = trim($data,'`') . ' > ' . $file;
+      shell_exec($cmd);
+      $data = '@' . $file;
+    }
     $arguments = array(
       'request' => 'PUT',
       'data' => $data );
     $this->send_to_view( '', $arguments );
+    if(null!=$file && file_exists($file))
+    {
+      unlink($file);
+    }
   }
 
   /**
