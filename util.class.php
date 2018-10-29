@@ -231,6 +231,7 @@ class util
     }
   }
 
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   public static function startsWith( $haystack, $needle )
   {
     // search backwards starting from haystack length characters from the end
@@ -238,6 +239,7 @@ class util
            false !== strrpos($haystack, $needle, -strlen($haystack));
   }
 
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   public static function endsWith( $haystack, $needle )
   {
     // search forward starting from end minus needle length characters
@@ -246,16 +248,20 @@ class util
              false !== strpos($haystack, $needle, $temp) );
   }
 
-  public static function time_to_label($time)
+
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  public static function time_to_label( $time )
   {
-    if($time<1.0)
+    if( 1.0 > $time )
     {
       return (intval($time*60) . ' sec');
     }
     else
     {
-      return (floor($time) .  ':' . intval(($time-floor($time))*60) . ' min');
+      $min = intval(floor($time));
+      $sec = intval(round(($time - $min)*60.0));
+      if( 10 > $sec ) $sec = '0' . $sec;
+      return sprintf( '%s:%s min', $min, $sec);
     }
   }
-
 }
