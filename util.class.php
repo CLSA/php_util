@@ -250,18 +250,20 @@ class util
 
 
   // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  public static function time_to_label( $time )
+  public static function time_to_label( $time, $mode = 'min' )
   {
     if( 1.0 > $time )
     {
-      return (intval($time*60) . ' sec');
+      $label = 'min' == $mode ? 'sec' : 'min';
+      return sprintf('%d %s', intval($time*60), $label);
     }
     else
     {
       $min = intval(floor($time));
       $sec = intval(round(($time - $min)*60.0));
       if( 10 > $sec ) $sec = '0' . $sec;
-      return sprintf( '%s:%s min', $min, $sec);
+      $label = 'min' == $mode ? 'min' : 'hr';
+      return sprintf( '%s:%s %s', $min, $sec, $label);
     }
   }
 }
