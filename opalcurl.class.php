@@ -22,6 +22,43 @@ class opalcurl
     $this->datasource = $datasource;
     $this->view = $view;
     $this->json_view_path = $path;
+    $this->view_is_table = false;
+  }
+
+  /**
+   * Download a binary file to the specified output file name.
+   * @return boolean Success or failed download
+   */
+  public function get_binary_file( $uid, $opal_var, $output_file )
+  {
+    $res = $this->get_participant( $uid );
+    if( is_object( $res ) && property_exists( $res, 'values' ) )
+    {
+      $res = array_filter( $res->values,
+        function ( $obj ) use( $opal_var )
+        {
+          return ( property_exists( $obj, 'link' ) &&
+                   property_exists( $obj, 'length' ) &&
+                   0 < $obj->length &&
+                   false !== strpos( $obj->link, $opal_var ) );
+        } );
+    }
+    if( NULL === $res || false === $res )
+    {
+      return false;
+    }
+
+    $res = current( $res );
+    $link = $res->link;
+
+    $this->send( $link, array( 'output' => $output_file ) );
+
+    // verify the file is non-empty
+    if( !file_exists( $output_file ) || 0 == filesize( $output_file ) )
+    {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -35,6 +72,16 @@ class opalcurl
    * @param string $datasource An opal datasource
    */
   public function set_datasource( $datasource ) { $this->datasource = $datasource; }
+
+
+  /**
+   * specify that the view name refers to a table (true)
+   * @param boolean $_view_is_table
+   */
+  public function set_view_is_table( $_view_is_table)
+  {
+    $this->view_is_table = $_view_is_table;
+  }
 
   /**
    * Get the view in the working opal datasource
@@ -95,7 +142,6 @@ class opalcurl
     $output = '';
     $return_var = NULL;
     exec( $command, $output, $return_var );
-
     if( 0 != $return_var )
     {
       fwrite( STDERR, sprintf( "unable to read from opal\n  command: \"%s\"\n  returned: \"%s\"",
@@ -114,8 +160,9 @@ class opalcurl
    */
   public function send_to_view( $path = '', $arguments = array(), $headers = array() )
   {
-    $url = str_replace( ' ', '%20', sprintf( '/datasource/%s/view/%s%s',
+    $url = str_replace( ' ', '%20', sprintf( '/datasource/%s/%s/%s%s',
                     $this->datasource,
+                    ($this->view_is_table?'table':'view'),
                     $this->view,
                     0 < strlen( $path ) ? '/'.$path : '' ) );
     return $this->send( $url, $arguments, $headers );
@@ -128,11 +175,11 @@ class opalcurl
    * @param string $limit The number of rows to return
    * @return array of associative arrays
    */
-  public function get_list( $offset = '', $limit = '' )
+  public function get_list( $offset = null, $limit = null )
   {
     $path = 'valueSets';
-    if( '' != $offset && '' != $limit )
-      $path .=  sprintf('?offset=%s&limit=%s', $offset, $limit );
+    if( null !== $offset && null !== $limit )
+      $path .= sprintf('?offset=%s&limit=%s', $offset, $limit );
     $result = $this->send_to_view( $path );
 
     if( is_object( $result ) &&
@@ -341,7 +388,10 @@ class opalcurl
   public function get_view_variables()
   {
     $url = str_replace( ' ', '%20',
-       sprintf( '/datasource/%s/view/%s/variables', $this->datasource, $this->view ) );
+       sprintf( '/datasource/%s/%s/%s/variables',
+       $this->datasource,
+       ($this->view_is_table?'table':'view'),
+       $this->view ) );
     return $this->send( $url );
   }
 
@@ -353,7 +403,10 @@ class opalcurl
   public function get_view_definition()
   {
     $url = str_replace( ' ', '%20',
-       sprintf( '/datasource/%s/view/%s', $this->datasource, $this->view ) );
+       sprintf( '/datasource/%s/%s/%s',
+       $this->datasource,
+       ($this->view_is_table?'table':'view'),
+       $this->view ) );
     return $this->send( $url );
   }
 
@@ -477,6 +530,13 @@ class opalcurl
    * @access private
    */
   private $view;
+
+  /**
+   *  Specify that a view name is a table name
+   * @var boolean
+   * @access private
+   */
+  private $view_is_table;
 
   /**
    * Path where views in json format are stored
