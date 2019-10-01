@@ -84,15 +84,6 @@ class opalcurl
   }
 
   /**
-   * specify that the view name refers to a table (true)
-   * @param boolean $_view_is_table
-   */
-  public function set_view_is_table( $_view_is_table)
-  {
-    $this->view_is_table = $_view_is_table;
-  }
-
-  /**
    * Get the view in the working opal datasource
    * @return string
    */
