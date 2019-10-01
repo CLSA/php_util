@@ -22,6 +22,43 @@ class opalcurl
     $this->datasource = $datasource;
     $this->view = $view;
     $this->json_view_path = $path;
+    $this->view_is_table = false;
+  }
+
+  /**
+   * Download a binary file to the specified output file name.
+   * @return boolean Success or failed download
+   */
+  public function get_binary_file( $uid, $opal_var, $output_file )
+  {
+    $res = $this->get_participant( $uid );
+    if( is_object( $res ) && property_exists( $res, 'values' ) )
+    {
+      $res = array_filter( $res->values,
+        function ( $obj ) use( $opal_var )
+        {
+          return ( property_exists( $obj, 'link' ) &&
+                   property_exists( $obj, 'length' ) &&
+                   0 < $obj->length &&
+                   false !== strpos( $obj->link, $opal_var ) );
+        } );
+    }
+    if( NULL === $res || false === $res )
+    {
+      return false;
+    }
+
+    $res = current( $res );
+    $link = $res->link;
+
+    $this->send( $link, array( 'output' => $output_file ) );
+
+    // verify the file is non-empty
+    if( !file_exists( $output_file ) || 0 == filesize( $output_file ) )
+    {
+      return false;
+    }
+    return true;
   }
 
   /**
@@ -35,6 +72,15 @@ class opalcurl
    * @param string $datasource An opal datasource
    */
   public function set_datasource( $datasource ) { $this->datasource = $datasource; }
+
+  /**
+   * specify that the view name refers to a table (true)
+   * @param boolean $_view_is_table
+   */
+  public function set_view_is_table( $_view_is_table)
+  {
+    $this->view_is_table = $_view_is_table;
+  }
 
   /**
    * Get the view in the working opal datasource
@@ -114,8 +160,9 @@ class opalcurl
    */
   public function send_to_view( $path = '', $arguments = array(), $headers = array() )
   {
-    $url = str_replace( ' ', '%20', sprintf( '/datasource/%s/view/%s%s',
+    $url = str_replace( ' ', '%20', sprintf( '/datasource/%s/%s/%s%s',
                     $this->datasource,
+                    ($this->view_is_table?'table':'view'),
                     $this->view,
                     0 < strlen( $path ) ? '/'.$path : '' ) );
     return $this->send( $url, $arguments, $headers );
@@ -189,15 +236,28 @@ class opalcurl
    * See set_json_view_path, get_json_view_path
    * @param string $date_before The date before in YYYY-MM-DD format
    * @param string $date_after The date after in YYYY-MM-DD format
+   * @param boolean $from_file For resolving curl argument list too long due to large json content
    */
-  public function set_date_range( $date_before, $date_after )
+  public function set_date_range( $date_before, $date_after, $from_file = false )
   {
     $data = sprintf( "`sed -e 's/BEFORE_DATE/%s/;s/AFTER_DATE/%s/' %s/" . $this->view . ".json`",
       $date_before, $date_after, $this->json_view_path );
+    $file = null;
+    if($from_file)
+    {
+      $file ='/tmp/' . $this->view . '.json';
+      $cmd = trim($data,'`') . ' > ' . $file;
+      shell_exec($cmd);
+      $data = '@' . $file;
+    }
     $arguments = array(
       'request' => 'PUT',
       'data' => $data );
     $this->send_to_view( '', $arguments );
+    if(null!=$file && file_exists($file))
+    {
+      unlink($file);
+    }
   }
 
   /**
@@ -328,7 +388,11 @@ class opalcurl
   public function get_view_variables()
   {
     $url = str_replace( ' ', '%20',
-       sprintf( '/datasource/%s/view/%s/variables', $this->datasource, $this->view ) );
+       sprintf( '/datasource/%s/%s/%s/variables',
+       $this->datasource,
+       ($this->view_is_table?'table':'view'),
+       $this->view ) );
+
     return $this->send( $url );
   }
 
@@ -340,7 +404,10 @@ class opalcurl
   public function get_view_definition()
   {
     $url = str_replace( ' ', '%20',
-       sprintf( '/datasource/%s/view/%s', $this->datasource, $this->view ) );
+       sprintf( '/datasource/%s/%s/%s',
+       $this->datasource,
+       ($this->view_is_table?'table':'view'),
+       $this->view ) );
     return $this->send( $url );
   }
 
@@ -464,6 +531,13 @@ class opalcurl
    * @access private
    */
   private $view;
+
+  /**
+   *  Specify that a view name is a table name
+   * @var boolean
+   * @access private
+   */
+  private $view_is_table;
 
   /**
    * Path where views in json format are stored
