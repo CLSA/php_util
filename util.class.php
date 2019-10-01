@@ -231,6 +231,7 @@ class util
     }
   }
 
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   public static function startsWith( $haystack, $needle )
   {
     // search backwards starting from haystack length characters from the end
@@ -238,11 +239,31 @@ class util
            false !== strrpos($haystack, $needle, -strlen($haystack));
   }
 
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   public static function endsWith( $haystack, $needle )
   {
     // search forward starting from end minus needle length characters
     return "" === $needle ||
            ( 0 <= ($temp = strlen($haystack) - strlen($needle)) &&
              false !== strpos($haystack, $needle, $temp) );
+  }
+
+
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  public static function time_to_label( $time, $mode = 'min' )
+  {
+    if( 1.0 > $time )
+    {
+      $label = 'min' == $mode ? 'sec' : 'min';
+      return sprintf('%d %s', intval($time*60), $label);
+    }
+    else
+    {
+      $min = intval(floor($time));
+      $sec = intval(round(($time - $min)*60.0));
+      if( 10 > $sec ) $sec = '0' . $sec;
+      $label = 'min' == $mode ? 'min' : 'hr';
+      return sprintf( '%s:%s %s', $min, $sec, $label);
+    }
   }
 }

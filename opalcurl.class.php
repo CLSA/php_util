@@ -73,6 +73,16 @@ class opalcurl
    */
   public function set_datasource( $datasource ) { $this->datasource = $datasource; }
 
+
+  /**
+   * specify that the view name refers to a table (true)
+   * @param boolean $_view_is_table
+   */
+  public function set_view_is_table( $_view_is_table)
+  {
+    $this->view_is_table = $_view_is_table;
+  }
+
   /**
    * specify that the view name refers to a table (true)
    * @param boolean $_view_is_table
@@ -141,7 +151,6 @@ class opalcurl
     $output = '';
     $return_var = NULL;
     exec( $command, $output, $return_var );
-
     if( 0 != $return_var )
     {
       fwrite( STDERR, sprintf( "unable to read from opal\n  command: \"%s\"\n  returned: \"%s\"",
@@ -175,11 +184,11 @@ class opalcurl
    * @param string $limit The number of rows to return
    * @return array of associative arrays
    */
-  public function get_list( $offset = '', $limit = '' )
+  public function get_list( $offset = null, $limit = null )
   {
     $path = 'valueSets';
-    if( '' != $offset && '' != $limit )
-      $path .=  sprintf('?offset=%s&limit=%s', $offset, $limit );
+    if( null !== $offset && null !== $limit )
+      $path .= sprintf('?offset=%s&limit=%s', $offset, $limit );
     $result = $this->send_to_view( $path );
 
     if( is_object( $result ) &&
@@ -392,7 +401,6 @@ class opalcurl
        $this->datasource,
        ($this->view_is_table?'table':'view'),
        $this->view ) );
-
     return $this->send( $url );
   }
 
