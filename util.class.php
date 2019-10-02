@@ -78,7 +78,7 @@ class util
   }
 
   // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
-  public static function read_csv($fileName)
+  public static function read_csv($fileName, $delim = '","')
   {
     $data = array();
     $file = fopen($fileName,'r');
@@ -98,12 +98,12 @@ class util
       $line = trim($line," \t\n\r\0\x0B\x08\"");
       if($first)
       {
-        $header = explode('","',$line);
+        $header = explode($delim,$line);
         $first = false;
         //var_dump($header);
         continue;
       }
-      $line1 = explode('","',$line);
+      $line1 = explode($delim,$line);
 
       if(count($header)!=count($line1))
       {
