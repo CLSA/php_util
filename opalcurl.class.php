@@ -43,7 +43,7 @@ class opalcurl
                    false !== strpos( $obj->link, $opal_var ) );
         } );
     }
-    if( NULL === $res || false === $res )
+    if( NULL === $res || false === $res || empty($res) )
     {
       return false;
     }
