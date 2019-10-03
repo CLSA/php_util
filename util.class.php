@@ -95,7 +95,7 @@ class util
     while(false !== ($line = fgets($file)))
     {
       $line_count++;
-      $line = trim($line," \t\n\r\0\x0B\x08\"");
+      $line = trim($line," '\t\n\r\0\x0B\x08\x0D\"");
       if($first)
       {
         $header = explode($delim,$line);
@@ -103,12 +103,16 @@ class util
         //var_dump($header);
         continue;
       }
+      if(false===strpos($line,$delim) || empty($line))
+      {
+        continue;
+      }
       $line1 = explode($delim,$line);
 
       if(count($header)!=count($line1))
       {
-        util::out(count($header) . ' < > ' . count($line1));
-        util::out('Error: line (' . $line_count . ') wrong number of elements ' . $line);
+        util::out(sprintf('ERROR: file %s line (%d) wrong number of elements: %d < > %d: %s',
+          basename($fileName), $line_count, count($header), count($line1), $line));
         die();
       }
       $data[] = array_combine($header,$line1);
