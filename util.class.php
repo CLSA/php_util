@@ -14,6 +14,35 @@ class util
   }
 
   // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
+  // Extract date elements from Hologic p File name
+  public static function get_pfile_date_elements($fname)
+  {
+    static $monthmap = array(
+      '1'=>'01',
+      '2'=>'02',
+      '3'=>'03',
+      '4'=>'04',
+      '5'=>'05',
+      '6'=>'06',
+      '7'=>'07',
+      '8'=>'08',
+      '9'=>'09',
+      'A'=>'10',
+      'B'=>'11',
+      'C'=>'12'
+    );
+
+    $bname = basename($fname);
+    $pname = substr(substr($bname,0,-4),2);
+    $yr = substr($pname,0,2);
+    $yr_prefix = ($yr>90)?'19':'20';
+    $mn = $monthmap[substr($pname,2,1)];
+    $da = substr($pname,3,2);
+    return array('YYYY'=>($yr_prefix . $yr),'MM'=>$mn,'dd'=>$da);
+  }
+
+
+  // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   // Recursive file glob.
   // Does not support flag GLOB_BRACE
   public static function rglob($pattern, $flags = 0)
@@ -21,7 +50,7 @@ class util
     $files = glob($pattern, $flags);
     foreach (glob(dirname($pattern).'/*', GLOB_ONLYDIR|GLOB_NOSORT) as $dir)
     {
-      $files = array_merge($files, rglob($dir.'/'.basename($pattern), $flags));
+      $files = array_merge($files, self::rglob($dir.'/'.basename($pattern), $flags));
     }
     return $files;
   }
