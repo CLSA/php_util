@@ -41,7 +41,6 @@ class util
     return array('YYYY'=>($yr_prefix . $yr),'MM'=>$mn,'dd'=>$da);
   }
 
-
   // -+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-+#+-
   // Recursive file glob.
   // Does not support flag GLOB_BRACE
@@ -159,7 +158,7 @@ class util
     }
 
     $a = array_shift( $array );
-    $b = permutations( $array );
+    $b = self::permutations( $array );
 
     $return = array();
     foreach( $a as $value )
@@ -185,7 +184,7 @@ class util
     }
 
     $a = array_shift( $array );
-    $b = numeric_permutations( $array );
+    $b = self::numeric_permutations( $array );
 
     $return = array();
     foreach( $a as $value )
