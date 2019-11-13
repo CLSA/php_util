@@ -268,10 +268,13 @@ class opalcurl
   {
     $result = $this->send_to_view( 'entities' );
     $list = array();
-    foreach( $result as $obj )
+    if( NULL !== $result )
     {
-      if( is_object( $obj ) && property_exists( $obj, 'identifier' ) )
-        $list[] = $obj->identifier;
+      foreach( $result as $obj )
+      {
+        if( is_object( $obj ) && property_exists( $obj, 'identifier' ) )
+          $list[] = $obj->identifier;
+      }
     }
     return $list;
   }
