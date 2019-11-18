@@ -62,6 +62,60 @@ class opalcurl
   }
 
   /**
+   * Helper function to recursively find the link to a repeated binary file
+   * variable
+   * @return
+   */
+  private function walk_recursive($obj, &$item, $opal_var, $pos)
+  {
+    if(is_object($obj) && NULL === $item)
+    {
+      if(property_exists($obj, 'values'))
+      {
+        foreach($obj->values as $value)
+        {
+          self::walk_recursive($value, $item, $opal_var, $pos);
+        }
+      }
+      else if (
+        property_exists( $obj, 'link' ) &&
+        property_exists( $obj, 'length' ) &&
+        0 < $obj->length &&
+        false !== strpos( $obj->link, $opal_var ) &&
+        false !== strpos( $obj->link, sprintf('value?pos=%d',$pos)) &&
+        $item != $obj->link )
+      {
+        $item = $obj->link;
+      }
+    }
+  }
+
+  /**
+   * Download a binary file to the specified output file name.
+   * For repeated variables, a specific offset must be given.
+   * @return boolean Success or failed download
+   */
+  public function get_binary_file_at_position( $uid, $opal_var, $output_file, $pos )
+  {
+    $res = NULL;
+    self::walk_recursive( $this->get_participant( $uid ), $res, $opal_var, $pos);
+
+    if( NULL === $res || false === $res || empty($res) )
+    {
+      return false;
+    }
+
+    $this->send( $res, array( 'output' => $output_file ) );
+
+    // verify the file is non-empty
+    if( !file_exists( $output_file ) || 0 == filesize( $output_file ) )
+    {
+      return false;
+    }
+    return true;
+  }
+
+  /**
    * Get the working opal datasource
    * @return string
    */
@@ -481,8 +535,8 @@ class opalcurl
   }
 
   /**
-   * Returns a value set from the baseline view for a particular participant
-   * @param string $uid articipant identifier
+   * Returns a value set from a view for a particular participant
+   * @param string $uid participant identifier
    * @return The json-decoded result of the request
    */
   public function get_participant( $uid )
@@ -490,6 +544,18 @@ class opalcurl
     $result = $this->send_to_view( sprintf( 'valueSet/%s', $uid ) );
     return is_object( $result ) && property_exists( $result, 'valueSets' ) ?
       current( $result->valueSets ) : NULL;
+  }
+
+  /**
+   * Returns a non-repeated variable value from a view for a particular participant
+   * @param string $uid participant identifier
+   * @return The json-decoded result of the request
+   */
+  public function get_participant_value( $uid, $variable )
+  {
+    $result = $this->send_to_view( sprintf( 'valueSet/%s/variable/%s', $uid, $variable ) );
+    return is_object( $result ) && property_exists( $result, 'value' ) ?
+      $result->value : NULL;
   }
 
   /**
