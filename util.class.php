@@ -131,10 +131,21 @@ class util
         //var_dump($header);
         continue;
       }
-      if(false===strpos($line,$delim) || empty($line))
+
+      $line1 = array();
+      if(false===strpos($line,$delim))
       {
-        continue;
+        if(1==count($header) && 0<strlen($line))
+          $line1[] = $line;
+        else
+          continue;
       }
+      else
+        $line1 = explode($delim,$line);
+
+      if(empty($line1))
+        continue;
+
       $line1 = explode($delim,$line);
 
       if(count($header)!=count($line1))
